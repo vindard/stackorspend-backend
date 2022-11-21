@@ -115,31 +115,39 @@ const handleRow = ({ acc, prev, row }: { acc; prev; row }) => {
 
   prev_agg_sats = agg_sats
 
-  console.log({
+  const newRow = {
     ...row,
     fiat_no_pl: fiat_no_pl.toFixed(2),
     fiat_pl: fiat_pl.toFixed(2),
     pl_pct: `${pl_pct.toFixed(2)}%`,
     agg_fiat_no_pl: agg_fiat_no_pl.toFixed(2),
     avg_price_no_pl: avg_price_no_pl.toFixed(2),
-  })
+  }
+
+  // console.log(newRow)
 
   return {
     acc: { avg_price_no_pl, agg_fiat_no_pl },
     prev: { prev_agg_sats, prev_avg_price },
+    row: newRow,
   }
 }
 
-const calculateCurrentStackPrice = async (db) => {
-  const acc = await new Promise((resolve) => {
+const processRowsAndCalculateCurrentStackPrice = async (db) => {
+  // @ts-ignore-next-line no-implicit-any error
+  const { acc, rows } = await new Promise((resolve) => {
     let acc = { avg_price_no_pl: 0, agg_fiat_no_pl: 0 }
     let prev = { prev_agg_sats: 0, prev_avg_price: 0 }
 
+    let newRow,
+      newRows = []
     db.all(TEST_SELECT, (err, rows) => {
       for (const row of rows) {
-        ;({ acc, prev } = handleRow({ acc, prev, row }))
+        ;({ acc, prev, row: newRow } = handleRow({ acc, prev, row }))
+        // @ts-ignore-next-line no-implicit-any error
+        newRows.push(newRow)
       }
-      resolve(acc)
+      resolve({ acc, rows: newRows })
     })
   })
 
@@ -149,6 +157,7 @@ const calculateCurrentStackPrice = async (db) => {
   return {
     agg_fiat_no_pl: agg_fiat_no_pl.toFixed(2),
     avg_price_no_pl: avg_price_no_pl.toFixed(2),
+    rows,
   }
 }
 
@@ -160,8 +169,10 @@ const buildTable = async (db) => {
 
   // Application calcs added
   // @ts-ignore-next-line no-implicit-any error
-  const { agg_fiat_no_pl, avg_price_no_pl } = await calculateCurrentStackPrice(db)
-  console.log("HERE:", { agg_fiat_no_pl, avg_price_no_pl })
+  const { agg_fiat_no_pl, avg_price_no_pl, rows } =
+    await processRowsAndCalculateCurrentStackPrice(db)
+  console.log("HERE 1:", { agg_fiat_no_pl, avg_price_no_pl })
+  console.log("HERE 2:", rows)
 }
 
 const main = async ({ fetchPrice, data }: { fetchPrice; data: INPUT_TXN[] }) => {
