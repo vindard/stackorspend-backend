@@ -66,30 +66,7 @@ const TEST_SELECT = `
 
   FROM transactions
 `
-const demo = async ({ db, fetchPrice }) => {
-  const lastPrice = await fetchPrice()
-  if (!lastPrice) throw new Error('No price data')
-
-  db.serialize(() => {
-    db.run(CREATE_TABLE)
-
-    const stmt = db.prepare(INSERT)
-    for (let i = 1; i < 11; i++) {
-      stmt.run([
-        i * 1000 * ((i % 2 === 0) ? -1 : 1),
-        (new Date(Date.now())).toISOString(),
-        lastPrice * 100_000,
-        12,
-        "USD",
-        "galoy",
-        crypto.randomUUID()
-      ])
-    }
-    stmt.finalize()
-  })
-}
-
-const populate = ({ db, data }: { db, data: INPUT_TXN[] }) => {
+const populate = ({ db, data }: { db; data: INPUT_TXN[] }) => {
   db.serialize(() => {
     db.run(CREATE_TABLE)
 
@@ -99,7 +76,7 @@ const populate = ({ db, data }: { db, data: INPUT_TXN[] }) => {
       const txn = data[i]
       stmt.run({
         [":sats_amount"]: txn.sats,
-        [":timestamp"]: (new Date(now + Number(i) * 100_000)).toISOString(),
+        [":timestamp"]: new Date(now + Number(i) * 100_000).toISOString(),
         [":display_currency_per_sat"]: txn.price * 10_000,
         [":offset"]: 12,
         [":display_currency_code"]: "USD",
@@ -112,42 +89,66 @@ const populate = ({ db, data }: { db, data: INPUT_TXN[] }) => {
   })
 }
 
-const addNoPlColumnsToRows = (db) => {
-  let avg_price_no_pl = 0
-  let agg_fiat_no_pl = 0
-  let prev_agg_sats = 0
-  let prev_avg_price = 0
-  db.each(TEST_SELECT, (err, row) => {
-    const { sats_amount, price, agg_sats, fiat_with_pl } = row
-    let fiat_no_pl
-    if (sats_amount > 0) { // isBuy
-      fiat_no_pl = (sats_amount / 10 ** 8) * price
-      agg_fiat_no_pl += fiat_no_pl
-      avg_price_no_pl = agg_fiat_no_pl / (agg_sats / 10 ** 8)
+const handleRow = ({ acc, prev, row }: { acc; prev; row }) => {
+  let { avg_price_no_pl, agg_fiat_no_pl } = acc
+  let { prev_agg_sats, prev_avg_price } = prev
 
-      prev_avg_price = avg_price_no_pl
-    } else { // isSell
-      fiat_no_pl = sats_amount * (agg_fiat_no_pl / prev_agg_sats)
-      agg_fiat_no_pl += fiat_no_pl
-      avg_price_no_pl = prev_avg_price
+  const { sats_amount, price, agg_sats, fiat_with_pl } = row
+  let fiat_no_pl
+  if (sats_amount > 0) {
+    // isBuy
+    fiat_no_pl = (sats_amount / 10 ** 8) * price
+    agg_fiat_no_pl += fiat_no_pl
+    avg_price_no_pl = agg_fiat_no_pl / (agg_sats / 10 ** 8)
 
-      prev_avg_price = prev_avg_price // No change to prev_avg_price
-    }
-    const fiat_pl = -(fiat_no_pl - fiat_with_pl)
-    const pl_pct = (fiat_pl / fiat_no_pl) * 100
+    prev_avg_price = avg_price_no_pl
+  } else {
+    // isSell
+    fiat_no_pl = sats_amount * (agg_fiat_no_pl / prev_agg_sats)
+    agg_fiat_no_pl += fiat_no_pl
+    avg_price_no_pl = prev_avg_price
 
-    prev_agg_sats = agg_sats
+    prev_avg_price = prev_avg_price // No change to prev_avg_price
+  }
+  const fiat_pl = -(fiat_no_pl - fiat_with_pl)
+  const pl_pct = (fiat_pl / fiat_no_pl) * 100
 
+  prev_agg_sats = agg_sats
 
-    console.log({
-      ...row,
-      fiat_no_pl: fiat_no_pl.toFixed(2),
-      fiat_pl: (fiat_pl).toFixed(2),
-      pl_pct: `${pl_pct.toFixed(2)}%`,
-      agg_fiat_no_pl: agg_fiat_no_pl.toFixed(2),
-      avg_price_no_pl: avg_price_no_pl.toFixed(2),
-    })
+  console.log({
+    ...row,
+    fiat_no_pl: fiat_no_pl.toFixed(2),
+    fiat_pl: fiat_pl.toFixed(2),
+    pl_pct: `${pl_pct.toFixed(2)}%`,
+    agg_fiat_no_pl: agg_fiat_no_pl.toFixed(2),
+    avg_price_no_pl: avg_price_no_pl.toFixed(2),
   })
+
+  return {
+    acc: { avg_price_no_pl, agg_fiat_no_pl },
+    prev: { prev_agg_sats, prev_avg_price },
+  }
+}
+
+const calculateCurrentStackPrice = async (db) => {
+  const acc = await new Promise((resolve) => {
+    let acc = { avg_price_no_pl: 0, agg_fiat_no_pl: 0 }
+    let prev = { prev_agg_sats: 0, prev_avg_price: 0 }
+
+    db.all(TEST_SELECT, (err, rows) => {
+      for (const row of rows) {
+        ;({ acc, prev } = handleRow({ acc, prev, row }))
+      }
+      resolve(acc)
+    })
+
+    // db.each(TEST_SELECT, (err, row) => {
+    //   ;({ acc, prev } = handleRow({ acc, prev, row }))
+    // })
+  })
+
+  // @ts-ignore-next-line no-implicit-any error
+  const { agg_fiat_no_pl, avg_price_no_pl } = acc
 
   return {
     agg_fiat_no_pl: agg_fiat_no_pl.toFixed(2),
@@ -155,27 +156,26 @@ const addNoPlColumnsToRows = (db) => {
   }
 }
 
-const buildTable = (db) => {
-
+const buildTable = async (db) => {
   // Intra-SQL calcs only
   // db.all(TEST_SELECT, (err, rows) => {
   //   console.log(rows)
   // })
 
   // Application calcs added
-  const { agg_fiat_no_pl, avg_price_no_pl } = addNoPlColumnsToRows(db)
-  console.log('HERE:', { agg_fiat_no_pl, avg_price_no_pl })
+  // @ts-ignore-next-line no-implicit-any error
+  const { agg_fiat_no_pl, avg_price_no_pl } = await calculateCurrentStackPrice(db)
+  console.log("HERE:", { agg_fiat_no_pl, avg_price_no_pl })
 }
 
-const main = async ({ fetchPrice, data }: { fetchPrice, data: INPUT_TXN[] }) => {
-  const db = new sqlite3.Database(':memory:', (err) => {
+const main = async ({ fetchPrice, data }: { fetchPrice; data: INPUT_TXN[] }) => {
+  const db = new sqlite3.Database(":memory:", (err) => {
     if (err) {
       return console.error(err.message)
     }
-    console.log('Connected to the in-memory SQlite database.')
+    console.log("Connected to the in-memory SQlite database.")
   })
 
-  // await demo({ db, fetchPrice })
   populate({ db, data })
 
   buildTable(db)
