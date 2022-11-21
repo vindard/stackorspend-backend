@@ -141,10 +141,6 @@ const calculateCurrentStackPrice = async (db) => {
       }
       resolve(acc)
     })
-
-    // db.each(TEST_SELECT, (err, row) => {
-    //   ;({ acc, prev } = handleRow({ acc, prev, row }))
-    // })
   })
 
   // @ts-ignore-next-line no-implicit-any error
