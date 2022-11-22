@@ -1,6 +1,5 @@
-import sqlite from "./services/sqlite"
-import price from "./services/price"
+import { sqlite } from "./get-txns-from-source-and-map"
 
-const main = (data) => sqlite({ fetchPrice: price, data })
+const main = (data) => sqlite(data)
 
 export default main

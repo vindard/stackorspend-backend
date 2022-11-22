@@ -1,6 +1,9 @@
-import sqlite from "./services/sqlite"
-import price from "./services/price"
 import Galoy from "./services/galoy"
+
+import sqlite3Pre from "sqlite3"
+const sqlite3 = sqlite3Pre.verbose()
+
+import { TransactionsRepository } from "./services/sqlite/transactions"
 
 type Txn = {
   node: {
@@ -10,6 +13,26 @@ type Txn = {
       base: number
     }
   }
+}
+
+export const sqlite = async (data) => {
+  const getDb = () =>
+    new sqlite3.Database(":memory:", (err) => {
+      if (err) {
+        return console.error(err.message)
+      }
+      console.log("Connected to the in-memory SQlite database.")
+    })
+
+  const db = getDb()
+  const txns = TransactionsRepository(db)
+
+  txns.persistMany(data)
+
+  const allTxns = await txns.fetchAll()
+  console.log("HERE 1:", allTxns)
+
+  db.close()
 }
 
 const main = async () => {
@@ -31,7 +54,7 @@ const main = async () => {
     return { sats: settlementAmount, price: base / 10 ** 6 }
   })
 
-  sqlite({ fetchPrice: price, data })
+  sqlite(data)
 }
 
 export default main
