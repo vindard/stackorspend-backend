@@ -1,5 +1,4 @@
-import fetchAllTxns from "./src/fetch-all-txns"
-import syncTxns from "./src/sync-txns"
+import { fetchAllTxns, syncTxns } from "./src/app"
 
 import { getDb } from "./src/services/sqlite"
 

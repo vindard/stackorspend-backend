@@ -1,8 +1,8 @@
-import { Galoy } from "./services/galoy"
+import { Galoy } from "../services/galoy"
 
-import { TransactionsRepository } from "./services/sqlite"
+import { TransactionsRepository } from "../services/sqlite"
 
-const syncTxns = async (db) => {
+export const syncTxns = async (db) => {
   // Fetch from source
   const transactions = await Galoy().fetchTransactions("./txns.json")
 
@@ -27,5 +27,3 @@ const syncTxns = async (db) => {
   // Persist locally
   await TransactionsRepository(db).persistMany(data)
 }
-
-export default syncTxns
