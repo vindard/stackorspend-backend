@@ -9,12 +9,14 @@ const defaultHeaders = {
   "Content-Type": "application/json",
   "Authorization": `Bearer ${GALOY_JWT}`,
 }
-const galoyRequestsPath = "./src/services/galoy-requests"
+const galoyRequestsPath = "./src/services/galoy/requests"
 
 const Transactions = fs.readFileSync(`${galoyRequestsPath}/transactions.gql`, "utf8")
 
-const Galoy = () => {
-  const fetchTransactions = async () => {
+export const Galoy = () => {
+  const fetchTransactions = async (path?: string) => {
+    console.log("Fetching galoy txns...")
+
     const allEdges = []
     let hasNextPage = true
     let after = null
@@ -27,12 +29,17 @@ const Galoy = () => {
         },
       }
 
-      const {
-        data: { data, errors },
-      } = await axios.post(API_ENDPOINT, query, {
-        headers: defaultHeaders,
-      })
-
+      let data, errors
+      if (path) {
+        ;({ data, errors } = JSON.parse(fs.readFileSync(path, "utf8")))
+        data.me.defaultAccount.wallets[0].transactions.pageInfo.hasNextPage = false
+      } else {
+        ;({
+          data: { data, errors },
+        } = await axios.post(API_ENDPOINT, query, {
+          headers: defaultHeaders,
+        }))
+      }
       const { edges, pageInfo } = data.me.defaultAccount.wallets[0].transactions
       console.log({ pageInfo, edges: edges.length })
       // @ts-ignore-next-line no-implicit-any error
@@ -43,6 +50,8 @@ const Galoy = () => {
     }
 
     console.log({ allEdges: allEdges.length })
+
+    console.log(`Fetched ${allEdges.length} galoy txns`)
     return allEdges
   }
 
@@ -50,5 +59,3 @@ const Galoy = () => {
     fetchTransactions,
   }
 }
-
-export default Galoy

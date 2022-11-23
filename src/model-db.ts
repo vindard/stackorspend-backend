@@ -1,4 +1,4 @@
-import { sqlite } from "./get-txns-from-source-and-map"
+import { sqlite } from "./sync-txns"
 
 const main = (data) => sqlite(data)
 

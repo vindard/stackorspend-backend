@@ -4,7 +4,7 @@ const PRICE_FRAG = `display_currency_per_sat / POWER(10, offset)`
 const FIAT_TOTAL_FRAG = `sats_amount * ${PRICE_FRAG}`
 const AGG_FIAT_WITH_PL_FRAG = `SUM(${FIAT_TOTAL_FRAG}) OVER(ORDER BY timestamp)`
 
-const BASE_TXNS_SELECT = `
+export const BASE_TXNS_SELECT = `
   SELECT
     timestamp,
     sats_amount,
@@ -25,7 +25,7 @@ const BASE_TXNS_SELECT = `
 
   FROM transactions
 `
-const handleRow = ({ acc, prev, row }: { acc; prev; row }) => {
+export const handleRow = ({ acc, prev, row }: { acc; prev; row }) => {
   let { avg_price_no_pl, agg_fiat_no_pl } = acc
   let { prev_agg_sats, prev_avg_price } = prev
 
