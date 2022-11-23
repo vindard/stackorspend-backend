@@ -1,4 +1,4 @@
-import { fetchAllTxns, syncTxns } from "./src/app"
+import { fetchAllTxns, syncTxns, getStackCost } from "./src/app"
 
 import { getDb } from "./src/services/sqlite"
 
@@ -8,7 +8,7 @@ export const StackorSpend = () => {
     syncTxns,
     fetchAllTxns,
 
-    // getStackPrice,
+    getStackCost,
     // checkPlannedStackTxn,
     // checkPlannedSpendTxn,
 
@@ -30,7 +30,10 @@ const main = async () => {
 
   console.log("Fetching transactions from Galoy...")
   const txns = await sos.fetchAllTxns(db)
-  console.log(txns.slice(0, 3))
+  console.log(txns)
+
+  const stackCost = await sos.getStackCost(db)
+  console.log("Current (DCA'd) stack cost is:", stackCost)
 
   db.close()
 }
