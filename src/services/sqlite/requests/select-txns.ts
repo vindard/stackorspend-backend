@@ -60,8 +60,6 @@ export const handleRow = ({ acc, prev, row }: { acc; prev; row }) => {
     avg_price_no_pl: avg_price_no_pl.toFixed(2),
   }
 
-  // console.log(newRow)
-
   return {
     acc: { avg_price_no_pl, agg_fiat_no_pl },
     prev: { prev_agg_sats, prev_avg_price },

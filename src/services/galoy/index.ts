@@ -49,8 +49,6 @@ export const Galoy = () => {
       ;({ hasNextPage } = pageInfo)
     }
 
-    console.log({ allEdges: allEdges.length })
-
     console.log(`Fetched ${allEdges.length} galoy txns`)
     return allEdges
   }

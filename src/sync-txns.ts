@@ -14,7 +14,6 @@ const syncTxns = async (db) => {
       ? -1
       : 0,
   )
-  // console.log(JSON.stringify(transactions.slice(0, 5), null, 2))
 
   // Process for local format
   const data: INPUT_TXN[] = txnsAsc.map((tx: Txn) => {

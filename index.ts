@@ -1,15 +1,7 @@
-import fs from "fs"
-
-import modelDb from "./src/model-db"
-
 import fetchAllTxns from "./src/fetch-all-txns"
 import syncTxns from "./src/sync-txns"
 
 import { getDb } from "./src/services/sqlite"
-
-// const dataRaw = fs.readFileSync("./sample-txn-data.json", "utf8")
-// const data = JSON.parse(dataRaw)
-// modelDb(data)
 
 // API definition
 export const StackorSpend = () => {
