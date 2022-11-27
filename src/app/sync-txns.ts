@@ -2,7 +2,7 @@ import { Galoy } from "../services/galoy"
 
 import { TransactionsRepository } from "../services/sqlite"
 
-export const syncTxns = async (db) => {
+export const syncTxns = async (db: Db) => {
   // Fetch from source
   const transactions = await Galoy().fetchTransactions(".vscode/txns-mainnet.json")
   // const transactions = await Galoy().fetchTransactions()

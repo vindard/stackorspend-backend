@@ -1,7 +1,9 @@
 import sqlite3Pre from "sqlite3"
+import { open } from "sqlite"
+
 const sqlite3 = sqlite3Pre.verbose()
 
-export const getDb = () => {
+export const getDb = async (): Promise<Db> => {
   const dbConfig = {
     memory: {
       path: ":memory:",
@@ -14,10 +16,12 @@ export const getDb = () => {
   }
 
   const { path, connectMsg } = dbConfig.testDisk
-  return new sqlite3.Database(path, (err) => {
-    if (err) {
-      return console.error(err.message)
-    }
-    console.log(connectMsg)
+
+  const db = await open({
+    filename: path,
+    driver: sqlite3.Database,
   })
+  console.log(connectMsg)
+
+  return db
 }

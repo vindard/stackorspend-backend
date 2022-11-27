@@ -9,3 +9,5 @@ type Txn = {
     }
   }
 }
+
+type Db = import("sqlite").Database
