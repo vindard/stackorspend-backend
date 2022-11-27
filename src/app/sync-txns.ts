@@ -20,8 +20,9 @@ export const syncTxns = async (db) => {
     const {
       settlementAmount,
       settlementPrice: { base },
+      createdAt: timestamp,
     } = tx.node
-    return { sats: settlementAmount, price: base / 10 ** 6 }
+    return { sats: settlementAmount, price: base / 10 ** 6, timestamp }
   })
 
   // Persist locally

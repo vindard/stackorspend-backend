@@ -1,4 +1,4 @@
-type INPUT_TXN = { sats: number; price: number }
+type INPUT_TXN = { sats: number; price: number; timestamp: number }
 
 type Txn = {
   node: {

@@ -41,7 +41,7 @@ export const TransactionsRepository = (db) => {
         const txn = data[i]
         stmt.run({
           [":sats_amount"]: txn.sats,
-          [":timestamp"]: new Date(now + Number(i) * 100_000).toISOString(),
+          [":timestamp"]: new Date(txn.timestamp * 1000).toISOString(),
           [":display_currency_per_sat"]: txn.price * 10_000,
           [":offset"]: 12,
           [":display_currency_code"]: "USD",
