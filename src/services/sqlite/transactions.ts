@@ -42,8 +42,8 @@ export const TransactionsRepository = (db) => {
         stmt.run({
           [":sats_amount"]: txn.sats,
           [":timestamp"]: new Date(txn.timestamp * 1000).toISOString(),
-          [":display_currency_per_sat"]: txn.price * 10_000,
-          [":offset"]: 12,
+          [":display_currency_per_sat"]: Math.round(txn.price * 10 ** 4),
+          [":display_currency_offset"]: 12,
           [":display_currency_code"]: "USD",
           [":source_name"]: "galoy",
           [":source_tx_id"]: crypto.randomUUID(),

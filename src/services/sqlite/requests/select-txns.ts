@@ -1,6 +1,6 @@
 const AGG_SATS_FRAG = `SUM(sats_amount) OVER(ORDER BY timestamp)`
-const PRICE_PER_BTC_FRAG = `display_currency_per_sat / POWER(10, offset - 8)`
-const PRICE_FRAG = `display_currency_per_sat / POWER(10, offset)`
+const PRICE_PER_BTC_FRAG = `display_currency_per_sat / POWER(10, display_currency_offset - 8)`
+const PRICE_FRAG = `display_currency_per_sat / POWER(10, display_currency_offset)`
 const FIAT_TOTAL_FRAG = `sats_amount * ${PRICE_FRAG}`
 const AGG_FIAT_WITH_PL_FRAG = `SUM(${FIAT_TOTAL_FRAG}) OVER(ORDER BY timestamp)`
 
