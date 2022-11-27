@@ -4,7 +4,8 @@ import { TransactionsRepository } from "../services/sqlite"
 
 export const syncTxns = async (db) => {
   // Fetch from source
-  const transactions = await Galoy().fetchTransactions("./txns.json")
+  const transactions = await Galoy().fetchTransactions(".vscode/txns-mainnet.json")
+  // const transactions = await Galoy().fetchTransactions()
 
   // Sort fetched
   const txnsAsc = transactions.sort((a: Txn, b: Txn) =>

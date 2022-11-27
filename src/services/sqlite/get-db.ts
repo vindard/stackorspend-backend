@@ -9,7 +9,7 @@ export const getDb = () => {
     },
     testDisk: {
       path: "test.db",
-      connectMsg: "Connected to 'test.db database.",
+      connectMsg: "Connected to 'test.db' database.",
     },
   }
 

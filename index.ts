@@ -1,4 +1,5 @@
 import { fetchAllTxns, syncTxns, getStackCost } from "./src/app"
+import { sleep } from "./src/domain/common"
 
 import { getDb } from "./src/services/sqlite"
 
@@ -32,6 +33,7 @@ const main = async () => {
   console.log("Finished sync.")
 
   console.log("Fetching transactions from Galoy...")
+  await sleep(1000)
   const txns = await sos.fetchTxns(db)
   console.log(txns)
 

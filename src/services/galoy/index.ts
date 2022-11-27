@@ -1,8 +1,9 @@
 import fs from "fs"
 import axios from "axios"
 
-const API_ENDPOINT = "https://api.staging.galoy.io/graphql/"
-const GALOY_JWT = process.env.GALOY_JWT
+const { API_ENDPOINT, GALOY_JWT } = process.env
+if (!API_ENDPOINT) throw new Error(`Missing 'API_ENDPOINT' env variable`)
+
 const defaultHeaders = {
   "Accept": "application/json",
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +42,7 @@ export const Galoy = () => {
         }))
       }
       const { edges, pageInfo } = data.me.defaultAccount.wallets[0].transactions
-      console.log({ pageInfo, edges: edges.length })
+      console.log("Page:", { pageInfo, edges: edges.length })
       // @ts-ignore-next-line no-implicit-any error
       allEdges.push(...edges)
 
