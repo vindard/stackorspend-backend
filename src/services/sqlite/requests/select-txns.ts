@@ -4,6 +4,8 @@ const PRICE_FRAG = `display_currency_per_sat / POWER(10, display_currency_offset
 const FIAT_TOTAL_FRAG = `sats_amount * ${PRICE_FRAG}`
 const AGG_FIAT_WITH_PL_FRAG = `SUM(${FIAT_TOTAL_FRAG}) OVER(ORDER BY timestamp)`
 
+const DISPLAY_AMOUNT = `printf("%.2f", display_currency_amount) AS amount`
+
 export const BASE_TXNS_SELECT = `
   SELECT
     timestamp,
