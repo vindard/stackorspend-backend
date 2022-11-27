@@ -1,6 +1,7 @@
 import fs from "fs"
+import { TableNotCreatedYetError, UnknownRepositoryError } from "../../domain/error"
 
-import { BASE_TXNS_SELECT, handleRow } from "./requests/select-txns"
+import { BASE_TXNS_ASC_SELECT, handleRow } from "./requests/select-txns"
 
 const REQUESTS_DIR = "./src/services/sqlite/requests"
 
@@ -14,7 +15,7 @@ export const TransactionsRepository = (db: Db) => {
 
     let newRow,
       newRows = []
-    const rows = await db.all(BASE_TXNS_SELECT)
+    const rows = await db.all(BASE_TXNS_ASC_SELECT)
     for (const row of rows) {
       ;({ acc, prev, row: newRow } = handleRow({ acc, prev, row }))
       // @ts-ignore-next-line no-implicit-any error
@@ -49,8 +50,27 @@ export const TransactionsRepository = (db: Db) => {
     console.log(`Persisted ${data.length} records in ${elapsed}s.`)
   }
 
+  const fetchTxn = async (id: string): Promise<Txn | undefined | Error> => {
+    try {
+      const txn: Txn | undefined = await db.get(
+        "SELECT * FROM transactions WHERE source_tx_id = ?",
+        id,
+      )
+      return txn
+    } catch (err) {
+      const { message } = err as Error
+      switch (true) {
+        case message.includes("no such table"):
+          return new TableNotCreatedYetError()
+        default:
+          return new UnknownRepositoryError()
+      }
+    }
+  }
+
   return {
     persistMany,
     fetchAll,
+    fetchTxn,
   }
 }

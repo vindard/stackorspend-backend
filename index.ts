@@ -1,13 +1,17 @@
-import { fetchAllTxns, syncTxns, getStackCost } from "./src/app"
+import { fetchAllTxns, syncLatestTxns, getStackCost } from "./src/app"
 
-import { getDb } from "./src/services/sqlite"
+import { getDb, TransactionsRepository } from "./src/services/sqlite"
 
 // API definition
 export const StackorSpend = () => {
   return {
-    syncTxns,
+    // TODO: Change this to be able to also check balance and resync if inconsistent
+    syncTxns: syncLatestTxns,
 
+    // TODO: Add a paginated option here for loading for Transactions view
     fetchTxns: fetchAllTxns,
+    // TODO: Write state to separate table on initial sync & resync
+    //       (instead of calculating in SELECT)
     getStackCost,
     // checkPlannedStackTxn,
     // checkPlannedSpendTxn,

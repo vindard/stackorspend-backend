@@ -6,7 +6,7 @@ const AGG_FIAT_WITH_PL_FRAG = `SUM(${FIAT_TOTAL_FRAG}) OVER(ORDER BY timestamp)`
 
 const DISPLAY_AMOUNT = `printf("%.2f", display_currency_amount) AS amount`
 
-export const BASE_TXNS_SELECT = `
+export const BASE_TXNS_ASC_SELECT = `
   SELECT
     timestamp,
     sats_amount,
@@ -77,7 +77,7 @@ export const selectTxns = async (db) => {
 
     let newRow,
       newRows = []
-    db.all(BASE_TXNS_SELECT, (err, rows) => {
+    db.all(BASE_TXNS_ASC_SELECT, (err, rows) => {
       for (const row of rows) {
         ;({ acc, prev, row: newRow } = handleRow({ acc, prev, row }))
         // @ts-ignore-next-line no-implicit-any error
