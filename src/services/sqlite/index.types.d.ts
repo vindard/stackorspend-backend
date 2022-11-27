@@ -1,7 +1,8 @@
-type INPUT_TXN = { sats: number; price: number; timestamp: number }
+type INPUT_TXN = { id: string; timestamp: number; sats: number; price: number }
 
 type Txn = {
   node: {
+    id: string
     createdAt: number
     settlementAmount: number
     settlementPrice: {

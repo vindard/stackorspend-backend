@@ -19,11 +19,12 @@ export const syncTxns = async (db: Db) => {
   // Process for local format
   const data: INPUT_TXN[] = txnsAsc.map((tx: Txn) => {
     const {
+      id,
       settlementAmount,
       settlementPrice: { base },
       createdAt: timestamp,
     } = tx.node
-    return { sats: settlementAmount, price: base / 10 ** 6, timestamp }
+    return { id, timestamp, sats: settlementAmount, price: base / 10 ** 6 }
   })
 
   // Persist locally

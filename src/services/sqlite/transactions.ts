@@ -1,4 +1,3 @@
-import crypto from "crypto"
 import fs from "fs"
 
 import { BASE_TXNS_SELECT, handleRow } from "./requests/select-txns"
@@ -41,7 +40,7 @@ export const TransactionsRepository = (db: Db) => {
         [":display_currency_offset"]: 12,
         [":display_currency_code"]: "USD",
         [":source_name"]: "galoy",
-        [":source_tx_id"]: crypto.randomUUID(),
+        [":source_tx_id"]: txn.id,
       })
     }
 
