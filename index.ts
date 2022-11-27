@@ -6,8 +6,8 @@ import { getDb } from "./src/services/sqlite"
 export const StackorSpend = () => {
   return {
     syncTxns,
-    fetchAllTxns,
 
+    fetchTxns: fetchAllTxns,
     getStackCost,
     // checkPlannedStackTxn,
     // checkPlannedSpendTxn,
@@ -16,6 +16,9 @@ export const StackorSpend = () => {
     // payWithAmountLnInvoice,
     // receiveLnNoAmount,
     // receiveLnWithAmount,
+
+    // payOnChainAddress,
+    // receiveOnChain,
   }
 }
 
@@ -29,7 +32,7 @@ const main = async () => {
   console.log("Finished sync.")
 
   console.log("Fetching transactions from Galoy...")
-  const txns = await sos.fetchAllTxns(db)
+  const txns = await sos.fetchTxns(db)
   console.log(txns)
 
   const stackCost = await sos.getStackCost(db)
