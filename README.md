@@ -38,6 +38,24 @@ export const StackorSpend = () => {
 }
 ```
 
+### Running the demo
+
+There is a script in the `index.ts` file of this repo that strings together the completed use-case methods so far to demonstrate some functionality. To see it simply follow these steps:
+
+1. Add the following to a `.env` file
+
+```bash
+export API_ENDPOINT="https://api.mainnet.galoy.io/graphql/"
+export GALOY_JWT="<your-token-here>"
+```
+
+2. Run the following from a terminal
+
+```
+$ yarn install
+$ yarn start
+```
+
 ## Open tasks
 
 - [ ] Store calculated stack price data for transactions in a separate table
