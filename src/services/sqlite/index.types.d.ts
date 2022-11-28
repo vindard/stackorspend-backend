@@ -1,4 +1,10 @@
-type INPUT_TXN = { id: string; timestamp: number; sats: number; price: number }
+type INPUT_TXN = {
+  id: string
+  timestamp: number
+  sats: number
+  price: number
+  status: string
+}
 
 type Txn = {
   cursor: string
@@ -9,6 +15,7 @@ type Txn = {
     settlementPrice: {
       base: number
     }
+    status: string
   }
 }
 

@@ -37,6 +37,7 @@ export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: numbe
         settlementAmount,
         settlementPrice: { base },
         createdAt: timestamp,
+        status,
       } = tx.node
 
       const txInDb = await txnsRepo.fetchTxn(id)
@@ -48,13 +49,14 @@ export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: numbe
         break
       }
       console.log(`Writing new txn '${id}'...`)
-      data.push({ id, timestamp, sats: settlementAmount, price: base / 10 ** 6 })
+      data.push({ id, timestamp, sats: settlementAmount, price: base / 10 ** 6, status })
     }
   }
   // Persist locally
   await TransactionsRepository(db).persistMany(data)
 
   // Check balance
+  // Note: figure how to handle pending transactions that disappear later (e.g. RBF)
   const sumFromLocal = await TransactionsRepository(db).sumSatsAmount()
   const balanceFromSource = await Galoy().balance()
   if (sumFromLocal !== balanceFromSource) {

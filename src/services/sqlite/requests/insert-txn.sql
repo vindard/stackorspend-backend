@@ -5,7 +5,8 @@ INSERT INTO transactions (
     display_currency_offset,
     display_currency_code,
     source_name,
-    source_tx_id
+    source_tx_id,
+    tx_status
 ) VALUES (
     :sats_amount,    
     :timestamp,
@@ -13,5 +14,6 @@ INSERT INTO transactions (
     :display_currency_offset,
     :display_currency_code,
     :source_name,
-    :source_tx_id
+    :source_tx_id,
+    :tx_status
 )
