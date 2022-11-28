@@ -6,7 +6,17 @@ import { Galoy } from "../services/galoy"
 
 import { TransactionsRepository } from "../services/sqlite"
 
-export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: number }) => {
+export const syncLatestTxns = async ({
+  db,
+  pageSize,
+  rescan = false,
+}: {
+  db: Db
+  pageSize: number
+  rescan?: boolean // continues scanning through all txns to find all missing txns
+}) => {
+  // TODO: Figure out how to fix mismatched/corrupted txns on rescan
+
   const txnsRepo = TransactionsRepository(db)
 
   const data: INPUT_TXN[] = []
@@ -14,7 +24,7 @@ export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: numbe
   let lastCursor: string | false | null = null
   let hasNextPage: boolean = true
   let finish = false
-  while (hasNextPage && lastCursor !== false && !finish) {
+  while ((rescan || !finish) && hasNextPage && lastCursor !== false) {
     // Fetch from source
     ;({ transactions, lastCursor, hasNextPage } = await Galoy().fetchTransactionsPage({
       first: pageSize,
@@ -46,7 +56,7 @@ export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: numbe
       }
       if (!(txInDb === undefined || txInDb instanceof Error)) {
         finish = true
-        break
+        continue
       }
       console.log(`Writing new txn '${id}'...`)
       data.push({ id, timestamp, sats: settlementAmount, price: base / 10 ** 6, status })

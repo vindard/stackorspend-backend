@@ -1,19 +1,15 @@
 import { fetchAllTxns, syncLatestTxns, getStackCost } from "./src/app"
-import { TableNotCreatedYetError } from "./src/domain/error"
-import { Galoy } from "./src/services/galoy"
 
 import { getDb, TransactionsRepository } from "./src/services/sqlite"
 
 // API definition
 export const StackorSpend = () => {
   return {
-    // TODO: Change this to be able to also check balance and resync if inconsistent
+    // TODO: Write state to separate table on sync/resync (instead of calculating in SELECT)
     syncTxns: syncLatestTxns,
 
-    // TODO: Add a paginated option here for loading for Transactions view
+    // TODO: Add a paginated option here for loading for Txns view (requires calcs state table first)
     fetchTxns: fetchAllTxns,
-    // TODO: Write state to separate table on initial sync & resync
-    //       (instead of calculating in SELECT)
     getStackCost,
     // checkPlannedStackTxn,
     // checkPlannedSpendTxn,
