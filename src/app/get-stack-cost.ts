@@ -2,6 +2,7 @@ import { TransactionsRepository } from "../services/sqlite"
 
 export const getStackCost = async (db: Db) => {
   const txns = await TransactionsRepository(db).fetchAll()
+  if (txns instanceof Error) throw txns
 
   const lastTxn = txns[txns.length - 1]
   // @ts-ignore-next-line no-implicit-any error

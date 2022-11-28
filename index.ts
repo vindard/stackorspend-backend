@@ -1,4 +1,5 @@
 import { fetchAllTxns, syncLatestTxns, getStackCost } from "./src/app"
+import { TableNotCreatedYetError } from "./src/domain/error"
 
 import { getDb, TransactionsRepository } from "./src/services/sqlite"
 
@@ -28,15 +29,24 @@ export const StackorSpend = () => {
 
 // Demo API usage
 const main = async () => {
+  const IMPORT_PAGE_SIZE = 100
+  const SYNC_PAGE_SIZE = 10
+
   const sos = StackorSpend()
   const db = await getDb()
 
   console.log("Syncing transactions from Galoy...")
-  await sos.syncTxns(db)
+  // Check if table exists
+  const tx = await TransactionsRepository(db).fetchAll()
+  await sos.syncTxns({
+    db,
+    pageSize: tx instanceof TableNotCreatedYetError ? IMPORT_PAGE_SIZE : SYNC_PAGE_SIZE,
+  })
   console.log("Finished sync.")
 
   console.log("Fetching transactions from local db...")
   const txns = await sos.fetchTxns(db)
+  if (txns instanceof Error) throw txns
   console.log("Last 2 txns:", txns.slice(txns.length - 3, txns.length - 1))
 
   const stackCost = await sos.getStackCost(db)
