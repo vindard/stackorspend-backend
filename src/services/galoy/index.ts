@@ -32,12 +32,12 @@ export const Galoy = () => {
     const {
       me: {
         defaultAccount: {
-          wallets: [{ balance }],
+          wallets: [{ balance, pendingIncomingBalance }],
         },
       },
     } = data
 
-    return balance
+    return balance + pendingIncomingBalance
   }
 
   const fetchTransactionsPage = async ({
