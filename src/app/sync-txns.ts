@@ -1,9 +1,12 @@
-import { TableNotCreatedYetError } from "../domain/error"
+import {
+  LocalBalanceDoesNotMatchSourceError,
+  TableNotCreatedYetError,
+} from "../domain/error"
 import { Galoy } from "../services/galoy"
 
 import { TransactionsRepository } from "../services/sqlite"
 
-export const syncLatestTxns = async ({db, pageSize}: {db: Db, pageSize: number}) => {
+export const syncLatestTxns = async ({ db, pageSize }: { db: Db; pageSize: number }) => {
   const txnsRepo = TransactionsRepository(db)
 
   const data: INPUT_TXN[] = []
@@ -50,4 +53,13 @@ export const syncLatestTxns = async ({db, pageSize}: {db: Db, pageSize: number})
   }
   // Persist locally
   await TransactionsRepository(db).persistMany(data)
+
+  // Check balance
+  const sumFromLocal = await TransactionsRepository(db).sumSatsAmount()
+  const balanceFromSource = await Galoy().balance()
+  if (sumFromLocal !== balanceFromSource) {
+    return new LocalBalanceDoesNotMatchSourceError()
+  }
+
+  return true
 }

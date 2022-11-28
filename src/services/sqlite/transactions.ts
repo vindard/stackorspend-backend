@@ -24,6 +24,22 @@ export const TransactionsRepository = (db: Db) => {
     }
   }
 
+  const sumSatsAmount = async (): Promise<number | Error> => {
+    const SUM_SATS_AMOUNT = `SELECT SUM(sats_amount) as sum FROM transactions;`
+    try {
+      const { sum } = await db.get(SUM_SATS_AMOUNT)
+      return sum || 0
+    } catch (err) {
+      const { message } = err as Error
+      switch (true) {
+        case message.includes("no such table"):
+          return new TableNotCreatedYetError()
+        default:
+          return new UnknownRepositoryError((err as Error).message)
+      }
+    }
+  }
+
   const fetchTxn = async (id: string): Promise<Txn | undefined | Error> => {
     try {
       const txn: Txn | undefined = await db.get(
@@ -97,6 +113,7 @@ export const TransactionsRepository = (db: Db) => {
 
   return {
     checkTableExists,
+    sumSatsAmount,
     fetchTxn,
     fetchAll,
     persistMany,

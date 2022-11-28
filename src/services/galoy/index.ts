@@ -13,8 +13,33 @@ const defaultHeaders = {
 const galoyRequestsPath = "./src/services/galoy/requests"
 
 const Transactions = fs.readFileSync(`${galoyRequestsPath}/transactions.gql`, "utf8")
+const Balance = fs.readFileSync(`${galoyRequestsPath}/balance.gql`, "utf8")
 
 export const Galoy = () => {
+  const balance = async () => {
+    console.log("Fetching galoy wallet balance...")
+
+    const query = {
+      query: Balance,
+    }
+
+    const {
+      data: { data, errors },
+    }: { data: BALANCE_RESPONSE } = await axios.post(API_ENDPOINT, query, {
+      headers: defaultHeaders,
+    })
+
+    const {
+      me: {
+        defaultAccount: {
+          wallets: [{ balance }],
+        },
+      },
+    } = data
+
+    return balance
+  }
+
   const fetchTransactionsPage = async ({
     first,
     cursorFetchAfter = null,
@@ -50,6 +75,7 @@ export const Galoy = () => {
   }
 
   return {
+    balance,
     fetchTransactionsPage,
   }
 }

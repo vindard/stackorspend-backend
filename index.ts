@@ -1,5 +1,6 @@
 import { fetchAllTxns, syncLatestTxns, getStackCost } from "./src/app"
 import { TableNotCreatedYetError } from "./src/domain/error"
+import { Galoy } from "./src/services/galoy"
 
 import { getDb, TransactionsRepository } from "./src/services/sqlite"
 
@@ -38,10 +39,11 @@ const main = async () => {
   console.log("Syncing transactions from Galoy...")
   const exists = await TransactionsRepository(db).checkTableExists("transactions")
   if (exists instanceof Error) throw exists
-  await sos.syncTxns({
+  const synced = await sos.syncTxns({
     db,
     pageSize: exists ? SYNC_PAGE_SIZE : IMPORT_PAGE_SIZE,
   })
+  if (synced instanceof Error) throw synced
   console.log("Finished sync.")
 
   console.log("Fetching transactions from local db...")

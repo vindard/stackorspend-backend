@@ -10,3 +10,17 @@ type TRANSACTION_RESPONSE = {
     }
   }
 }
+
+type BALANCE_RESPONSE = {
+  errors
+  data: {
+    me: {
+      defaultAccount: {
+        wallets: {
+          balance: number
+          pendingIncomingBalance: number
+        }[]
+      }
+    }
+  }
+}
