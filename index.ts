@@ -36,11 +36,11 @@ const main = async () => {
   const db = await getDb()
 
   console.log("Syncing transactions from Galoy...")
-  // Check if table exists
-  const tx = await TransactionsRepository(db).fetchAll()
+  const exists = await TransactionsRepository(db).checkTableExists("transactions")
+  if (exists instanceof Error) throw exists
   await sos.syncTxns({
     db,
-    pageSize: tx instanceof TableNotCreatedYetError ? IMPORT_PAGE_SIZE : SYNC_PAGE_SIZE,
+    pageSize: exists ? SYNC_PAGE_SIZE : IMPORT_PAGE_SIZE,
   })
   console.log("Finished sync.")
 

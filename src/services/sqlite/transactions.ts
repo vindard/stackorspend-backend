@@ -9,6 +9,21 @@ const CREATE_TABLE = fs.readFileSync(`${REQUESTS_DIR}/create-txns-table.sql`, "u
 const INSERT = fs.readFileSync(`${REQUESTS_DIR}/insert-txn.sql`, "utf8")
 
 export const TransactionsRepository = (db: Db) => {
+  const checkTableExists = async (table: string): Promise<boolean | Error> => {
+    try {
+      const txn: Txn | undefined = await db.get(`SELECT * FROM ${table}`)
+      return true
+    } catch (err) {
+      const { message } = err as Error
+      switch (true) {
+        case message.includes("no such table"):
+          return false
+        default:
+          return new UnknownRepositoryError((err as Error).message)
+      }
+    }
+  }
+
   const fetchTxn = async (id: string): Promise<Txn | undefined | Error> => {
     try {
       const txn: Txn | undefined = await db.get(
@@ -81,6 +96,7 @@ export const TransactionsRepository = (db: Db) => {
   }
 
   return {
+    checkTableExists,
     fetchTxn,
     fetchAll,
     persistMany,
